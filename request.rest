@@ -1,0 +1,56 @@
+POST http://localhost:6200/api/register
+Content-Type: application/json
+
+{
+    "username": "user1",
+    "email": "user1@web.com",
+    "password": "123456"
+}
+
+###
+
+POST http://localhost:6200/api/login
+Content-Type: application/json
+
+{
+    "username": "user1",
+    "password": "123456"
+}
+
+###
+
+POST http://localhost:6200/api/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjYyMGFlY2JhMzdkZjFiZTUyOTU2YmUiLCJpYXQiOjE2MDAyNjE4MTF9.V6TWJUc_JQvLYudtv8ZVeOmJbnI3Q-1zJULFdQsOZ5Q"
+}
+
+###
+
+POST http://localhost:6200/api/logout
+Content-Type: application/json
+
+{
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjYyMGFlY2JhMzdkZjFiZTUyOTU2YmUiLCJpYXQiOjE2MDAyNjA4NTd9.zxifz3YgoedSBe3nCp53i8Hjgd-mNpTV2Euw0LySAZI"
+}
+
+###
+
+GET http://localhost:6200/api/test/auth
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjYyMGFlY2JhMzdkZjFiZTUyOTU2YmUiLCJ1c2VybmFtZSI6InVzZXIxIiwicm9sZXMiOltdLCJpYXQiOjE2MDAyNjMwMzUsImV4cCI6MTYwMDI2MzkzNX0.TjPkoORS2DOKOCK7-tnvXKM58VZjcZcgvso9eImgm_U
+
+###
+
+POST http://localhost:6200/api/posts/addTweet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjYyMGFlY2JhMzdkZjFiZTUyOTU2YmUiLCJ1c2VybmFtZSI6InVzZXIxIiwicm9sZXMiOltdLCJpYXQiOjE2MDAzNDEwNjksImV4cCI6MTYwMDM0MTk2OX0.zRE72SPwLta8sKnf6AsSpul98fPQJ7RXPnrgO36ySus
+
+{
+    "tweet": "askfhfjkhaskfhasf"
+}
+
+###
+
+GET http://localhost:6200/api/posts/getTweet/5f62169bf67c7c30aa277be8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZjYyMGFlY2JhMzdkZjFiZTUyOTU2YmUiLCJ1c2VybmFtZSI6InVzZXIxIiwicm9sZXMiOltdLCJpYXQiOjE2MDAyNjMwMzUsImV4cCI6MTYwMDI2MzkzNX0.TjPkoORS2DOKOCK7-tnvXKM58VZjcZcgvso9eImgm_U
