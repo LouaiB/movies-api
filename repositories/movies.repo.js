@@ -49,6 +49,21 @@ const SearchMovies = {
     Success: 1,
 }
 
+// SILENT FAILURES //
+const AddLike = {
+    Success: 1,
+}
+const AddDislike = {
+    Success: 1,
+}
+const RemoveLike = {
+    Success: 1,
+}
+const RemoveDislike = {
+    Success: 1,
+}
+////////////////////
+
 const GetTweetResponseEnum = {
     UserNotFound: 1,
     PostNotFound: 2,
@@ -68,6 +83,10 @@ module.exports = {
     GetMovie,
     SearchMovies,
     GetTweetResponseEnum,
+    AddLike,
+    AddDislike,
+    RemoveLike,
+    RemoveDislike,
 
     async addTag(name, description, thumbnail) {
         try{
@@ -117,12 +136,25 @@ module.exports = {
                 if(dbTag) dbTags.push(dbTag.name);
             }
 
+            // !!! FOR PRESENTATION ONLY !!! //
+            const views = (Math.random() * 10000).toFixed(0);
+            const likesAmount = (Math.random() * views).toFixed(0);
+            const dislikesAmount = (Math.random() * views).toFixed(0);
+            const likes = [];
+            const dislikes = [];
+            for(let i = 1; i <= likesAmount; i++) likes.push(i);
+            for(let i = 1; i <= dislikesAmount; i++) dislikes.push(i);
+            /////////////////////////////////////
+
             const newMovie = new Movie({
                 title,
                 description,
                 mediapath: movieVideo,
                 thumbnail,
                 tags: dbTags,
+                views,      // PRESENTATION ONLY
+                likes,      // PRESENTATION ONLY
+                dislikes,   // PRESENTATION ONLY
             });
             if(releaseDate) newMovie.releasedOn = releaseDate;
             if(alternativeTitles) newMovie.alternativeTitles = alternativeTitles.split('|').map(altT => altT.trim());
@@ -215,7 +247,7 @@ module.exports = {
             // Query
             console.log(`Query applied: ${applyQuery} (${query})`);
             let queried = movies;
-            if(applyQuery) queried = movies.filter(m => similarity(m.title, query) > 0.1);
+            if(applyQuery) queried = movies.filter(m => similarity(m.title, query) > 0.3);
 
             // Tag exclusion
             console.log(`Exclusion applied: ${applyExclusion}`);
@@ -331,20 +363,75 @@ module.exports = {
     },
 
     
-    // async getTweet(tweetId){
-    //     try{
-    //         const tweet = await Post.findById(tweetId);
-    //         if(!tweet) return { status: GetTweetResponseEnum.PostNotFound };
+    async addLike(movieId, userId) {
+        try{
+            const movie = await Movie.findById(movieId);
+            if(!movie) return { status: AddLike.Success };
 
-    //         const poster = await User.findById(tweet.userId);
-    //         if(!poster) return { status: GetTweetResponseEnum.UserNotFound };
+            if(!movie.likes.includes(userId)) {
+                movie.likes.push(userId);
+                movie.dislikes = movie.dislikes.filter(d => d != userId);
+                movie.save();
+            }
 
-    //         return { status: GetTweetResponseEnum.Success, tweet, poster };
-    //     } catch(e) {
-    //         console.error(e.message);
-    //         throw e;
-    //     }
-    // },
+            return { status: AddLike.Success, movie };
+        } catch(e) {
+            console.error(e);
+            throw e;
+        }
+    },
+
+    async addDislike(movieId, userId) {
+        try{
+            const movie = await Movie.findById(movieId);
+            if(!movie) return { status: AddDislike.Success };
+
+            if(!movie.dislikes.includes(userId)) {
+                movie.dislikes.push(userId);
+                movie.likes = movie.likes.filter(l => l != userId);
+                movie.save();
+            }
+
+            return { status: AddDislike.Success, movie };
+        } catch(e) {
+            console.error(e);
+            throw e;
+        }
+    },
+
+    async removeLike(movieId, userId) {
+        try{
+            const movie = await Movie.findById(movieId);
+            if(!movie) return { status: RemoveLike.Success };
+
+            if(movie.likes.includes(userId)) {
+                movie.likes = movie.likes.filter(l => l != userId);
+                movie.save();
+            }
+
+            return { status: RemoveLike.Success, movie };
+        } catch(e) {
+            console.error(e);
+            throw e;
+        }
+    },
+
+    async removeDislike(movieId, userId) {
+        try{
+            const movie = await Movie.findById(movieId);
+            if(!movie) return { status: RemoveDislike.Success };
+
+            if(movie.dislikes.includes(userId)) {
+                movie.dislikes = movie.dislikes.filter(d => d != userId);
+                movie.save();
+            }
+
+            return { status: RemoveDislike.Success, movie };
+        } catch(e) {
+            console.error(e);
+            throw e;
+        }
+    },
 
     
 }

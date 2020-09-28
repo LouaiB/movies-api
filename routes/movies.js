@@ -5,14 +5,12 @@
 
 const express = require('express');
 const router = express.Router();
-const PostsRepo = require('../repositories/posts.repo');
 const MoviesRepo = require('../repositories/movies.repo');
 const { ensureAuthenticated, ensureHasRoles } = require('../jwt/auth.middleware');
 const multer = require('multer');
-const tweetUpload = require('../utils/multer/tweetUpload.multer');
 const tagUpload = require('../utils/multer/tagUpload.multer');
 const movieUpload = require('../utils/multer/movieUpload.multer');
-const { addTweetValidator } = require('../validators/posts.validators');
+const { getTrendingValidator, searchMoviesValidator, addLikeValidator, addDislikeValidator, removeLikeValidator, removeDislikeValidator } = require('../validators/movies.validators');
 
 // TAGS
 router.post('/addTag', ensureAuthenticated, async (req, res, next) => {
@@ -214,8 +212,7 @@ router.get('/getRandom/:amount', async (req, res, next) => {
 
 });
 
-// TODO: Add validator
-router.post('/getTrending', async (req, res, next) => {
+router.post('/getTrending', getTrendingValidator, async (req, res, next) => {
     try{
         const { span, pageNum, pageSize } = req.body;
 
@@ -258,7 +255,7 @@ router.get('/getMovie/:id', async (req, res, next) => {
 
 });
 
-router.post('/searchMovies', async (req, res, next) => {
+router.post('/searchMovies', searchMoviesValidator, async (req, res, next) => {
     try{
         const { filters, pageNum, pageSize } = req.body;
 
@@ -278,23 +275,17 @@ router.post('/searchMovies', async (req, res, next) => {
 
 });
 
-router.get('/getTweet/:id', ensureAuthenticated, async (req, res, next) => {
+router.post('/addLike', ensureAuthenticated, addLikeValidator, async (req, res, next) => {
     try{
-        const tweetId = req.params.id;
-    
-        const result = await PostsRepo.getTweet(tweetId);
+        const { movieId } = req.body;
+
+        const result = await MoviesRepo.addLike(movieId, req.user._id);
         switch(result.status){
-            case PostsRepo.GetTweetResponseEnum.UserNotFound:
-                res.status(404).json({ ...result, message: 'Poster not found.'});
-                break;
-            case PostsRepo.GetTweetResponseEnum.PostNotFound:
-                res.status(404).json({ ...result, message: 'Tweet not found.'});
-                break;
-            case PostsRepo.GetTweetResponseEnum.Success:
-                res.json(result);
+            case MoviesRepo.AddLike.Success:
+                return res.json({ ...result, message: 'Like added successfully.'});
                 break;
             default:
-                res.json({ message: 'Default response.'});
+                return res.json({ message: 'Default response.'});
         }
 
     } catch (e) {
@@ -302,5 +293,61 @@ router.get('/getTweet/:id', ensureAuthenticated, async (req, res, next) => {
         next(e);
     }
 });
+router.post('/addDislike', ensureAuthenticated, addDislikeValidator, async (req, res, next) => {
+    try{
+        const { movieId } = req.body;
+
+        const result = await MoviesRepo.addDislike(movieId, req.user._id);
+        switch(result.status){
+            case MoviesRepo.AddDislike.Success:
+                return res.json({ ...result, message: 'Dislike added successfully.'});
+                break;
+            default:
+                return res.json({ message: 'Default response.'});
+        }
+
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
+});
+router.post('/removeLike', ensureAuthenticated, removeLikeValidator, async (req, res, next) => {
+    try{
+        const { movieId } = req.body;
+
+        const result = await MoviesRepo.removeLike(movieId, req.user._id);
+        switch(result.status){
+            case MoviesRepo.RemoveLike.Success:
+                return res.json({ ...result, message: 'Like removed successfully.'});
+                break;
+            default:
+                return res.json({ message: 'Default response.'});
+        }
+
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
+});
+router.post('/removeDislike', ensureAuthenticated, removeDislikeValidator, async (req, res, next) => {
+    try{
+        const { movieId } = req.body;
+
+        const result = await MoviesRepo.removeDislike(movieId, req.user._id);
+        switch(result.status){
+            case MoviesRepo.RemoveDislike.Success:
+                return res.json({ ...result, message: 'Dislike removed successfully.'});
+                break;
+            default:
+                return res.json({ message: 'Default response.'});
+        }
+
+    } catch (e) {
+        console.error(e);
+        next(e);
+    }
+});
+
+
 
 module.exports = router;
